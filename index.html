@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bio-Calculus: KK Cattle Growth Dynamics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 1); }
+        .math-font { font-family: 'Courier New', Courier, monospace; font-weight: bold; color: #1e293b; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-8 text-center md:text-left">
+            <h1 class="text-3xl font-bold text-emerald-800">Bioscience Analytics: Derivatives in Animal Husbandry</h1>
+            <p class="text-slate-600 mt-2">Modeling the Growth of <span class="font-semibold italic text-emerald-700">Kedah-Kelantan (KK) Cattle</span> in Malaysia</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Information Panel -->
+            <div class="lg:col-span-1 space-y-6">
+                <section class="glass-card p-6 rounded-2xl shadow-sm">
+                    <h2 class="text-xl font-semibold mb-3 text-slate-800">The Biological Problem</h2>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        In Malaysian beef production, maximizing <strong>Feed Conversion Ratio (FCR)</strong> is vital. 
+                        As an Animal Husbandry student, you must identify the <strong>Point of Inflection</strong>—where the cattle's daily weight gain starts to slow down. 
+                        Past this point, keeping the animal becomes less profitable as feed costs outweigh the gain in meat.
+                    </p>
+                    <div class="mt-4 p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                        <p class="text-xs text-emerald-800 font-medium italic">Data inspired by MARDI (Malaysian Agricultural Research and Development Institute) growth studies for local KK crossbreeds.</p>
+                    </div>
+                </section>
+
+                <section class="glass-card p-6 rounded-2xl shadow-sm">
+                    <h2 class="text-xl font-semibold mb-3 text-slate-800">The Mathematics</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-xs uppercase tracking-wider text-slate-400 mb-1">Total Weight $f(t)$</p>
+                            <p class="math-font text-lg">W(t) = a · e<sup>-b · e<sup>-ct</sup></sup></p>
+                            <p class="text-[10px] text-slate-500 mt-1">(Gompertz Growth Model)</p>
+                        </div>
+                        <hr class="border-slate-100">
+                        <div>
+                            <p class="text-xs uppercase tracking-wider text-slate-400 mb-1 font-bold">The Derivative $f'(t)$</p>
+                            <p class="math-font text-lg text-emerald-600">W'(t) = W(t) · b · c · e<sup>-ct</sup></p>
+                            <p class="text-[10px] text-slate-500 mt-1">Calculates the **Average Daily Gain (ADG)** at any specific day.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Visualizer Panel -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass-card p-6 rounded-2xl shadow-lg relative h-[450px]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-slate-800">Growth Curve Analysis</h2>
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full uppercase">Interactive Chart</span>
+                    </div>
+                    <canvas id="growthChart"></canvas>
+                </div>
+
+                <div id="insightBox" class="bg-white p-6 rounded-2xl shadow-md border-l-8 border-slate-300 transition-all duration-300 opacity-50">
+                    <div class="flex items-start">
+                        <div class="mr-4 text-3xl" id="insightEmoji">📊</div>
+                        <div>
+                            <h3 id="insightTitle" class="font-bold text-slate-800 text-lg">Interactive Insight</h3>
+                            <p id="insightText" class="text-slate-600">Click anywhere on the graph to analyze the growth rate ($f'(t)$) and management advice for that specific growth period.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-8 text-center text-slate-400 text-sm">
+            Created for SFH: Animal Husbandry Technology Program • Malaysia 2024
+        </footer>
+    </div>
+
+    <script>
+        // Realistic KK Cattle Growth Parameters
+        const a = 380; // Asymptotic weight (max weight in kg)
+        const b = 2.8; // Constant related to initial weight
+        const c = 0.005; // Growth rate constant
+        const days = 800; // Track growth up to 800 days
+
+        const labels = [];
+        const weightData = [];
+        const growthRateData = [];
+
+        for (let t = 0; t <= days; t += 10) {
+            labels.push(t);
+            // f(t) = a * exp(-b * exp(-c * t))
+            const weight = a * Math.exp(-b * Math.exp(-c * t));
+            weightData.push(weight.toFixed(2));
+            
+            // f'(t) = W(t) * b * c * exp(-c * t)
+            const rate = weight * b * c * Math.exp(-c * t);
+            growthRateData.push(rate.toFixed(4));
+        }
+
+        const ctx = document.getElementById('growthChart').getContext('2d');
+        const growthChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Total Weight (kg)',
+                        data: weightData,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        yAxisID: 'y',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: 'Growth Rate f\'(t) (kg/day)',
+                        data: growthRateData,
+                        borderColor: '#3b82f6',
+                        borderDash: [5, 5],
+                        yAxisID: 'y1',
+                        tension: 0.4,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Weight (kg)', font: { weight: 'bold' } }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        title: { display: true, text: 'ADG (kg/day)', font: { weight: 'bold' } }
+                    },
+                    x: {
+                        title: { display: true, text: 'Age (Days)', font: { weight: 'bold' } }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { enabled: true }
+                },
+                onClick: (e) => {
+                    handleChartClick(e);
+                }
+            }
+        });
+
+        function handleChartClick(evt) {
+            const points = growthChart.getElementsAtEventForMode(evt, 'index', { intersect: false }, true);
+
+            if (points.length) {
+                const index = points[0].index;
+                const day = labels[index];
+                const weight = weightData[index];
+                const adg = (growthRateData[index] * 1).toFixed(3); // Convert to number for clarity
+
+                const box = document.getElementById('insightBox');
+                const title = document.getElementById('insightTitle');
+                const text = document.getElementById('insightText');
+                const emoji = document.getElementById('insightEmoji');
+
+                box.style.opacity = "1";
+                box.style.borderLeftColor = "#10b981";
+
+                let advice = "";
+                let status = "";
+
+                // Logic based on the derivative value
+                if (day < 200) {
+                    status = "Rapid Growth Phase";
+                    advice = `At day ${day}, the weight is ${weight}kg. The growth rate ($f'(t)$) is ${adg} kg/day and rising. This is the 'Pre-pubertal' phase; focus on high-protein Malaysian forage like Napier grass to support bone development.`;
+                    emoji.innerHTML = "🌱";
+                } else if (day >= 200 && day < 450) {
+                    status = "Peak Efficiency (Optimal)";
+                    advice = `At day ${day}, the growth rate is at its highest (${adg} kg/day). The derivative $f'(t)$ is peaking! This is the most efficient time to feed your cattle for maximum profit per Ringgit spent on concentrates.`;
+                    emoji.innerHTML = "🚀";
+                } else {
+                    status = "Diminishing Returns";
+                    advice = `At day ${day}, the weight is ${weight}kg but the growth rate has dropped to ${adg} kg/day. The derivative is decreasing. In Animal Husbandry, this indicates the animal is reaching maturity; further intensive feeding may not be cost-effective for beef.`;
+                    emoji.innerHTML = "📉";
+                }
+
+                title.innerHTML = `Day ${day}: ${status}`;
+                text.innerHTML = `<strong>Calculated f'(${day}):</strong> ${adg} kg gain per day.<br>${advice}`;
+            }
+        }
+    </script>
+</body>
+</html>
